@@ -21,3 +21,7 @@ def parse_shrimp_request(
         return None
     args = url.path.strip("/").split("/")
     return command, list(filter(bool, args))
+
+
+def build_shrimp_request(command: str, *args: str):
+    return f"{CALL_METHOD_HEAD}shrimp://{command}/{'/'.join(args)}"

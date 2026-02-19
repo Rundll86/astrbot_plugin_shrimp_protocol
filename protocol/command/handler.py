@@ -2,8 +2,8 @@ import inspect
 from typing import TYPE_CHECKING
 
 from astrbot.api.event import AstrMessageEvent
+from protocol.parse import build_shrimp_request
 
-from ..constants import CALL_METHOD_HEAD
 from ..exceptions import CannotTasteAir, LockedShrimp, UntastyFood
 from .structs import CommandHandler
 
@@ -47,7 +47,7 @@ class CommandStore:
             self.store[command] = Command(func, **kwargs)
 
             def wrapper(*args: str):
-                return f"{CALL_METHOD_HEAD}shrimp://{command}/{'/'.join(args)}"
+                return build_shrimp_request(command, *args)
 
             return wrapper
 
