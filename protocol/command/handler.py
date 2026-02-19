@@ -2,9 +2,9 @@ import inspect
 from typing import TYPE_CHECKING
 
 from astrbot.api.event import AstrMessageEvent
-from protocol.parse import build_shrimp_request
 
 from ..exceptions import CannotTasteAir, LockedShrimp, UntastyFood
+from ..parse import build_shrimp_request
 from .structs import CommandHandler
 
 if TYPE_CHECKING:
