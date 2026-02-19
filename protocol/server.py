@@ -1,3 +1,4 @@
+import inspect
 from typing import Any
 
 import socketio
@@ -53,6 +54,12 @@ class Server:
 
     def call(self, request: ShrimpRequest, event: AstrMessageEvent):
         return self.command_store.run(request[0], event, self, *request[1])
+
+    async def call_async(self, request: ShrimpRequest, event: AstrMessageEvent):
+        result = self.command_store.run(request[0], event, self, *request[1])
+        if inspect.iscoroutine(result):
+            return await result
+        return result
 
     async def start(self):
         self.runner = web.AppRunner(self.app)

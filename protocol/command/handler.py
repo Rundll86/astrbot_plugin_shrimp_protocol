@@ -18,6 +18,7 @@ class Command:
             len(inspect.signature(handler).parameters.values()) - 2
         )  # 减二的原因看下文
         self.need_session = need_session
+        self.is_async = inspect.iscoroutinefunction(handler)
 
     def run(self, event: AstrMessageEvent, server: "Server", *args: str):
         if len(args) != self.argument_count:
@@ -37,7 +38,7 @@ class CommandStore:
     ):
         full = self.get_full_store()
         if command_name in full:
-            command = self.store[command_name]
+            command = full[command_name]
             if command.need_session and not server.is_message_in_session(event):
                 raise LockedShrimp()
             else:

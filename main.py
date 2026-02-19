@@ -24,7 +24,7 @@ class ShrimpProtocolPlugin(Star):
         if request:
             logger.info(f"已解析调料：{request}")
             try:
-                result = self.server.call(request, event)
+                result = await self.server.call_async(request, event)
                 logger.info(type(result))
                 yield result
             except Exception as e:
