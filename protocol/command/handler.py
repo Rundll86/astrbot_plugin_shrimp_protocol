@@ -17,10 +17,10 @@ class Command:
         self.argument_count = len(inspect.signature(handler).parameters.values()) - 2
         self.need_session = need_session
 
-    async def run(self, event: AstrMessageEvent, server: "Server", *args: str):
+    def run(self, event: AstrMessageEvent, server: "Server", *args: str):
         if len(args) != self.argument_count:
             raise UntastyFood()
-        return self.handler(*args, **{"event": event, "server": server})
+        return self.handler(*args, event=event, server=server)
 
 
 class CommandStore:
@@ -28,7 +28,7 @@ class CommandStore:
         self.store: dict[str, Command] = {}
         self.parent = parent
 
-    async def run(
+    def run(
         self, command_name: str, event: AstrMessageEvent, server: "Server", *args: str
     ):
         full = self.get_full_store()
@@ -37,7 +37,7 @@ class CommandStore:
             if command.need_session and not server.is_message_in_session(event):
                 raise LockedShrimp()
             else:
-                return await command.run(event, server, *args)
+                return command.run(event, server, *args)
         else:
             raise CannotTasteAir()
 

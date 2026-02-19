@@ -20,4 +20,4 @@ def parse_shrimp_request(
     else:
         return None
     args = url.path.strip("/").split("/")
-    return command, args
+    return command, list(filter(bool, args))

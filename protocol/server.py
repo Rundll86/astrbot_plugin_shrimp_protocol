@@ -51,8 +51,8 @@ class Server:
     async def emit(self, data: Any):
         await self.socket.emit(self.channel_name, data)
 
-    async def call(self, request: ShrimpRequest, event: AstrMessageEvent):
-        return await self.command_store.run(request[0], event, self, *request[1])
+    def call(self, request: ShrimpRequest, event: AstrMessageEvent):
+        return self.command_store.run(request[0], event, self, *request[1])
 
     async def start(self):
         self.runner = web.AppRunner(self.app)
