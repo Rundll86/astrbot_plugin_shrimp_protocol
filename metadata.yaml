@@ -1,0 +1,6 @@
+name: astrbot_plugin_shrimp_protocol
+version: v1.0.0
+display_name: Shrimp.Protocol
+desc: 基于aiocqhttp的P2P虚拟以太网通信协议，一个QQ号为一个协议对等体。
+author: 陨落基围虾
+repo: https://github.com/Rundll86/astrbot_plugin_shrimp_protocol
