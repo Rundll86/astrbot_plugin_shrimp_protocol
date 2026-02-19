@@ -59,6 +59,9 @@ class Server:
         result = self.command_store.run(request[0], event, self, *request[1])
         if inspect.iscoroutine(result):
             return await result
+        if inspect.isasyncgen(result):
+            async for item in result:
+                return item
         return result
 
     async def start(self):
