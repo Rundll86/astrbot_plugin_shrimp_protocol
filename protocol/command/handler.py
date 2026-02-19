@@ -14,13 +14,17 @@ if TYPE_CHECKING:
 class Command:
     def __init__(self, handler: CommandHandler, need_session: bool = False) -> None:
         self.handler = handler
-        self.argument_count = len(inspect.signature(handler).parameters.values()) - 2
+        self.argument_count = (
+            len(inspect.signature(handler).parameters.values()) - 2
+        )  # 减二的原因看下文
         self.need_session = need_session
 
     def run(self, event: AstrMessageEvent, server: "Server", *args: str):
         if len(args) != self.argument_count:
             raise UntastyFood()
-        return self.handler(*args, event=event, server=server)
+        return self.handler(
+            *args, event=event, server=server
+        )  # 之所以减二：给event和server预留位置
 
 
 class CommandStore:
