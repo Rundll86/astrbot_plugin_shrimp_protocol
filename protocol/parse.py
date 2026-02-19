@@ -2,17 +2,22 @@ from urllib.parse import urlparse
 
 from astrbot.api.event import AstrMessageEvent
 
+ShrimpRequest = tuple[str, list[str]]
 
-def parse_shrimp_request(event: AstrMessageEvent):
+
+def parse_shrimp_request(
+    event: AstrMessageEvent,
+) -> ShrimpRequest | None:
     url = urlparse(event.message_str)
     if url.scheme != "shrimp":
         return None
     if url.hostname:
-        first = url.hostname
+        command = url.hostname
     else:
         return None
     if url.path.startswith("/"):
-        operation = url.path[1:]
+        args = url.path[1:]
     else:
-        operation = url.path
-    return [first, *operation.split("/")]
+        args = url.path
+    args = args.split("/")
+    return command, args

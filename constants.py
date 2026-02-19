@@ -1,1 +1,0 @@
-SOCKETIO_MESSAGE_EVENT = "data"
