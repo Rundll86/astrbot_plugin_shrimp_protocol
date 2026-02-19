@@ -8,6 +8,7 @@ from astrbot.api.event import AstrMessageEvent, MessageChain
 from astrbot.api.star import Star
 from astrbot.core.message.components import Plain
 
+from .command import cook
 from .command.handler import CommandStore
 from .constants import DEFAULT_CHANNEL_NAME
 from .parse import ShrimpRequest
@@ -33,23 +34,25 @@ class Server:
         self.command_store = command_store
 
         async def socket_receive(text, json):
-            logger.info(f"调料入锅：{text}")
-            for session in self.pot_context.get_sessions():
-                await self.star.context.send_message(
-                    session,
-                    MessageChain(chain=[Plain(f"shrimp://cook/{json['data']}")]),
-                )
+            logger.info(f"调料入锅：SID={text}, Data={json}")
+            for pot in self.pot_context.pots:
+                logger.info(pot.bot)
+                if pot.bot == json["peer"]:
+                    await self.star.context.send_message(
+                        pot.session,
+                        MessageChain(chain=[Plain(cook(json["data"]))]),
+                    )
 
         self.socket.on(self.channel_name, socket_receive)
 
     def is_message_in_session(self, event: AstrMessageEvent):
-        return self.pot_context.match(event.get_platform_id(), event.session)
+        return self.pot_context.includes(event.get_platform_id(), event.session)
 
     async def emit(self, data: Any):
         await self.socket.emit(self.channel_name, data)
 
     async def call(self, request: ShrimpRequest, event: AstrMessageEvent):
-        self.command_store.run(request[0], event, self, *request[1])
+        return await self.command_store.run(request[0], event, self, *request[1])
 
     async def start(self):
         self.runner = web.AppRunner(self.app)

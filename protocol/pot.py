@@ -20,12 +20,12 @@ class PotContext:
         self.pots: list[PotDescriptor] = []
 
     def add(self, bot: str, session: MessageSession):
-        if self.match(bot, session):
+        if self.includes(bot, session):
             raise BrokenPotRequest("锅装不下了。")
         self.pots.append(PotDescriptor(bot, session))
 
     def remove(self, bot: str, session: MessageSession):
-        if not self.match(bot, session):
+        if not self.includes(bot, session):
             raise BrokenPotRequest("锅已经烧干了。")
         self.pots.remove(PotDescriptor(bot, session))
 
@@ -35,5 +35,8 @@ class PotContext:
     def get_sessions(self):
         return [x.session for x in self.pots]
 
-    def match(self, bot: str, session: MessageSession):
+    def filter(self, bot: str, session: MessageSession):
         return filter(lambda x: x == PotDescriptor(bot, session), self.pots)
+
+    def includes(self, bot: str, session: MessageSession):
+        return len([*self.filter(bot, session)]) > 0

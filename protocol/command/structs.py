@@ -1,4 +1,5 @@
-from collections.abc import Callable
-from types import CoroutineType
+from collections.abc import AsyncGenerator, Callable
 
-CommandHandler = Callable[..., CoroutineType | None]
+from astrbot.api.event import MessageEventResult
+
+CommandHandler = Callable[..., AsyncGenerator[MessageEventResult] | None]

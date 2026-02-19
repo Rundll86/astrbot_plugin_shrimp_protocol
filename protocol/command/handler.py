@@ -1,21 +1,26 @@
 import inspect
+from typing import TYPE_CHECKING
 
 from astrbot.api.event import AstrMessageEvent
 
-from ..exceptions import UntastyFood
-from ..server import Server
+from ..constants import CALL_METHOD_HEAD
+from ..exceptions import CannotTasteAir, LockedShrimp, UntastyFood
 from .structs import CommandHandler
+
+if TYPE_CHECKING:
+    from ..server import Server
 
 
 class Command:
-    def __init__(self, handler: CommandHandler) -> None:
+    def __init__(self, handler: CommandHandler, need_session: bool = False) -> None:
         self.handler = handler
         self.argument_count = len(inspect.signature(handler).parameters.values()) - 2
+        self.need_session = need_session
 
-    def run(self, event: AstrMessageEvent, server: Server, *args: str):
+    async def run(self, event: AstrMessageEvent, server: "Server", *args: str):
         if len(args) != self.argument_count:
             raise UntastyFood()
-        self.handler(*args, {"event": event, "server": server})
+        return self.handler(*args, **{"event": event, "server": server})
 
 
 class CommandStore:
@@ -23,13 +28,28 @@ class CommandStore:
         self.store: dict[str, Command] = {}
         self.parent = parent
 
-    def run(self, command: str, event: AstrMessageEvent, server: Server, *args: str):
-        if command in self.get_full_store():
-            self.store[command].run(event, server, *args)
+    async def run(
+        self, command_name: str, event: AstrMessageEvent, server: "Server", *args: str
+    ):
+        full = self.get_full_store()
+        if command_name in full:
+            command = self.store[command_name]
+            if command.need_session and not server.is_message_in_session(event):
+                raise LockedShrimp()
+            else:
+                return await command.run(event, server, *args)
+        else:
+            raise CannotTasteAir()
 
-    def command(self, command: str):
+    def command(self, **kwargs):
         def decorator(func: CommandHandler):
-            self.store[command] = Command(func)
+            command = func.__name__
+            self.store[command] = Command(func, **kwargs)
+
+            def wrapper(*args: str):
+                return f"{CALL_METHOD_HEAD}shrimp://{command}/{'/'.join(args)}"
+
+            return wrapper
 
         return decorator
 
