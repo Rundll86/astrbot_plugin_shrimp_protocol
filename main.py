@@ -12,6 +12,7 @@ from .protocol.server import Server
 class ShrimpProtocolPlugin(Star):
     def __init__(self, context, config):
         super().__init__(context, config)
+        self.config = config or {}
         self.server = Server(self, command.init())
         asyncio.create_task(self.server.start())
 
